@@ -27,6 +27,7 @@ public class FlinkStreamConsumer {
     private DataStream<String> dataStream ;
     private StreamExecutionEnvironment see;
     private StreamTableEnvironment streamTableEnvironment;
+    private boolean created;
 
 
 
@@ -63,9 +64,12 @@ public class FlinkStreamConsumer {
         DataStream<String> dataStream = see.socketTextStream("localhost",6777);
 
         DataStream<Tuple2<Integer,Time>> dataSet = dataStream.map(mapFunction).assignTimestampsAndWatermarks(extractor);
-
-        streamTableEnvironment.registerDataStream("random_numbers_2",dataSet);
-
+        if(!created) {
+            streamTableEnvironment.registerDataStream("random_numbers", dataSet);
+            created = true;
+        }else{
+            //streamTableEnvironment.
+        }
         String sql = "SELECT * FROM  random_numbers";
         Table table = streamTableEnvironment.sqlQuery(sql);
         streamTableEnvironment.toAppendStream(table,Row.class).print();
